@@ -1,0 +1,15 @@
+package com.example.budgettingapp.ui.expenses;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import androidx.fragment.app.Fragment;
+import com.example.budgettingapp.databinding.FragmentViewExpenseBinding;
+import com.example.budgettingapp.data.Expense;
+
+@kotlin.Metadata(mv = {1, 9, 0}, k = 2, xi = 48, d1 = {"\u0000\b\n\u0000\n\u0002\u0010\u000e\n\u0000\"\u000e\u0010\u0000\u001a\u00020\u0001X\u0082T\u00a2\u0006\u0002\n\u0000\u00a8\u0006\u0002"}, d2 = {"ARG_EXPENSE", "", "app_release"})
+public final class ViewExpenseFragmentKt {
+    @org.jetbrains.annotations.NotNull
+    private static final java.lang.String ARG_EXPENSE = "expense";
+}
