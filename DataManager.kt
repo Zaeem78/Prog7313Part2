@@ -12,8 +12,8 @@ class DataManager private constructor(context: Context) {
     private val gson = Gson()
     
     // Constants for date and time formatting
-    private val DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE
-    private val TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_TIME
+    private val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")
 
     companion object {
         private var instance: DataManager? = null

@@ -3,6 +3,7 @@ package com.example.budgettingapp
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -104,8 +105,11 @@ class MainActivity : AppCompatActivity() {
         val user = auth.currentUser
         user?.let {
             val headerView = binding.navView.getHeaderView(0)
-            headerView.findViewById<TextView>(R.id.nav_header_email).text = it.email
-            headerView.findViewById<TextView>(R.id.nav_header_name).text = it.displayName
+            val emailView = headerView.findViewById<TextView>(R.id.nav_header_email)
+            val nameView = headerView.findViewById<TextView>(R.id.nav_header_name)
+            
+            emailView.text = it.email
+            nameView.text = it.displayName
         }
     }
 

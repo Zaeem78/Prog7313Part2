@@ -1,5 +1,6 @@
 package com.example.budgettingapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -9,8 +10,12 @@ import com.example.budgettingapp.data.Expense
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
 import android.widget.Toast
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 
 class ViewExpenseActivity : AppCompatActivity() {
     private lateinit var binding: ActivityViewExpenseBinding
@@ -81,11 +86,15 @@ class ViewExpenseActivity : AppCompatActivity() {
         }
     }
 
-    private fun formatDate(date: Date): String {
-        return SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(date)
+    private fun formatDate(date: LocalDateTime): String {
+        return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+            .withLocale(Locale.getDefault())
+            .format(date)
     }
 
-    private fun formatTime(time: Date): String {
-        return SimpleDateFormat("HH:mm", Locale.getDefault()).format(time)
+    private fun formatTime(time: LocalDateTime): String {
+        return DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+            .withLocale(Locale.getDefault())
+            .format(time)
     }
 }

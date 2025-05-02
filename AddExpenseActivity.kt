@@ -10,6 +10,8 @@ import com.example.budgettingapp.data.DataManager
 import com.example.budgettingapp.data.Expense
 import com.example.budgettingapp.databinding.ActivityAddExpenseBinding
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.*
@@ -19,8 +21,8 @@ class AddExpenseActivity : AppCompatActivity() {
     private lateinit var dataManager: DataManager
     
     // Constants for date and time formatting
-    private val DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE
-    private val TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_TIME
+    private val DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    private val TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")
     private val CURRENT_DATE = LocalDateTime.now()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,9 +37,9 @@ class AddExpenseActivity : AppCompatActivity() {
 
     private fun setupViews() {
         // Set current date and time
-        binding.etDate.text = DATE_FORMATTER.format(CURRENT_DATE)
-        binding.etStartTime.text = TIME_FORMATTER.format(CURRENT_DATE)
-        binding.etEndTime.text = TIME_FORMATTER.format(CURRENT_DATE)
+        binding.etDate.setText(DATE_FORMATTER.format(CURRENT_DATE))
+        binding.etStartTime.setText(TIME_FORMATTER.format(CURRENT_DATE))
+        binding.etEndTime.setText(TIME_FORMATTER.format(CURRENT_DATE))
 
         // Set up date picker
         binding.etDate.setOnClickListener {
@@ -69,7 +71,7 @@ class AddExpenseActivity : AppCompatActivity() {
             this,
             { _, year, month, dayOfMonth ->
                 val selectedDate = "$year-${month + 1}-$dayOfMonth"
-                binding.etDate.text = selectedDate
+                binding.etDate.setText(selectedDate)
             },
             year,
             month,
@@ -87,7 +89,7 @@ class AddExpenseActivity : AppCompatActivity() {
             this,
             { _, hourOfDay, minute ->
                 val time = String.format("%02d:%02d", hourOfDay, minute)
-                timeEditText.text = time
+                timeEditText.setText(time)
             },
             hour,
             minute,
@@ -102,17 +104,17 @@ class AddExpenseActivity : AppCompatActivity() {
         val endTime = binding.etEndTime.text.toString()
         val description = binding.etDescription.text.toString()
         val category = binding.etCategory.text.toString()
-        val amount = binding.etAmount.text.toString().toDoubleOrNull()
+        val amountText = binding.etAmount.text.toString()
+        val amount = amountText.toDoubleOrNull() ?: 0.0
 
         // Validate input
-        if (!validateInput(date, startTime, endTime, description, category, amount)) {
+        if (!validateInput(date, startTime, endTime, description, category, amountText)) {
             return
         }
 
         // Parse dates and times
-        val parsedDate = parseDate(date)
-        val parsedStartTime = parseTime(startTime)
-        val parsedEndTime = parseTime(endTime)
+        val parsedStartTime = parseDateTime(date, startTime)
+        val parsedEndTime = parseDateTime(date, endTime)
 
         // Validate time range
         if (!validateTimeRange(parsedStartTime, parsedEndTime)) {
@@ -124,7 +126,7 @@ class AddExpenseActivity : AppCompatActivity() {
             title = description,
             amount = amount,
             category = category,
-            date = parsedDate,
+            date = parsedStartTime,
             startTime = parsedStartTime,
             endTime = parsedEndTime,
             description = description
@@ -142,11 +144,22 @@ class AddExpenseActivity : AppCompatActivity() {
         endTime: String,
         description: String,
         category: String,
-        amount: Double?
+        amountText: String
     ): Boolean {
         if (date.isEmpty() || startTime.isEmpty() || endTime.isEmpty() ||
-            description.isEmpty() || category.isEmpty() || amount == null) {
+            description.isEmpty() || category.isEmpty() || amountText.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        val amount = amountText.toDoubleOrNull()
+        if (amount == null) {
+            Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        if (amount < 0) {
+            Toast.makeText(this, "Amount must be positive", Toast.LENGTH_SHORT).show()
             return false
         }
 
@@ -157,26 +170,39 @@ class AddExpenseActivity : AppCompatActivity() {
 
         try {
             // Attempt to parse dates and times to ensure they're valid
-            parseDate(date)
-            parseTime(startTime)
-            parseTime(endTime)
+            parseDateTime(date, startTime)
+            parseDateTime(date, endTime)
         } catch (e: DateTimeParseException) {
             Toast.makeText(this, "Invalid date or time format", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        // Check if end time is after start time
+        val startTime = parseDateTime(date, startTime)
+        val endTime = parseDateTime(date, endTime)
+        if (!validateTimeRange(startTime, endTime)) {
+            Toast.makeText(this, "End time must be after start time", Toast.LENGTH_SHORT).show()
             return false
         }
 
         return true
     }
 
-    private fun parseDate(dateString: String): LocalDateTime {
-        return LocalDateTime.parse(dateString, DATE_FORMATTER)
+    private fun parseDateTime(dateString: String, timeString: String): LocalDateTime {
+        val date = parseDate(dateString)
+        val time = parseTime(timeString)
+        return LocalDateTime.of(date, time)
     }
 
-    private fun parseTime(timeString: String): LocalDateTime {
-        return LocalDateTime.parse(timeString, TIME_FORMATTER)
+    private fun parseDate(dateString: String): LocalDate {
+        return LocalDate.parse(dateString, DATE_FORMATTER)
+    }
+
+    private fun parseTime(timeString: String): LocalTime {
+        return LocalTime.parse(timeString, TIME_FORMATTER)
     }
 
     private fun validateTimeRange(startTime: LocalDateTime, endTime: LocalDateTime): Boolean {
-        return startTime.isBefore(endTime)
+        return startTime.isBefore(endTime) || startTime.isEqual(endTime)
     }
 }
